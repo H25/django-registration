@@ -4,7 +4,6 @@ import random
 import re
 
 from django.conf import settings
-from django.contrib.auth.models import User
 from django.db import models
 from django.db import transaction
 from django.template.loader import render_to_string
@@ -69,9 +68,8 @@ class RegistrationManager(models.Manager):
                 profile.save()
                 return user
         return False
-    
-    def create_inactive_user(self, username, email, password,
-                             site, send_email=True):
+
+    def create_inactive_user(self, form_kwargs, site, send_email=True):
         """
         Create a new, inactive ``User``, generate a
         ``RegistrationProfile`` and email its activation key to the
@@ -79,9 +77,8 @@ class RegistrationManager(models.Manager):
 
         By default, an activation email will be sent to the new
         user. To disable this, pass ``send_email=False``.
-        
         """
-        new_user = User.objects.create_user(username, email, password)
+        new_user = User.objects.create_user(**form_kwargs)
         new_user.is_active = False
         new_user.save()
 
@@ -104,7 +101,7 @@ class RegistrationManager(models.Manager):
         
         """
         salt = hashlib.sha1(str(random.random())).hexdigest()[:5]
-        username = user.username
+        username = getattr(user, User.USERNAME_FIELD)
         if isinstance(username, unicode):
             username = username.encode('utf-8')
         activation_key = hashlib.sha1(salt+username).hexdigest()
