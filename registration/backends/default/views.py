@@ -1,7 +1,6 @@
 from django.conf import settings
 from django.contrib.sites.models import RequestSite
 from django.contrib.sites.models import Site
-from django.contrib.auth import get_user_model
 
 from registration import signals
 from registration.models import RegistrationProfile
@@ -72,11 +71,9 @@ class RegistrationView(BaseRegistrationView):
         class of this backend as the sender.
 
         """
-        User = get_user_model()
         form_kwargs = {'password': cleaned_data['password1']}
-        for field in [User.USERNAME_FIELD] + list(User.REQUIRED_FIELDS):
-            if field in cleaned_data:
-                form_kwargs[field] = cleaned_data[field]
+        for field in cleaned_data:
+            form_kwargs[field] = cleaned_data[field]
 
         if Site._meta.installed:
             site = Site.objects.get_current()
