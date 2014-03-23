@@ -72,18 +72,12 @@ class RegistrationView(BaseRegistrationView):
         class of this backend as the sender.
 
         """
-        User = get_user_model()
-        form_kwargs = {'password': cleaned_data['password1']}
-        for field in set([User.USERNAME_FIELD] + list(User.REQUIRED_FIELDS)):
-            if field in cleaned_data:
-                form_kwargs[field] = cleaned_data[field]
-
         if Site._meta.installed:
             site = Site.objects.get_current()
         else:
             site = RequestSite(request)
         new_user = RegistrationProfile.objects.create_inactive_user(
-            form_kwargs, site
+            cleaned_data, site
         )
 
         signals.user_registered.send(
